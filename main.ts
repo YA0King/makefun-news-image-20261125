@@ -1,4 +1,4 @@
-// news-image-20261125 entry (Node 22, standard library only).
+// news-image-20261125 entry, second version (Node 22, standard library only).
 //
 // The entry is a program that writes one image summing up the world
 // news of Wednesday 25 November 2026 to /output/entry.png.
@@ -8,9 +8,16 @@
 // randomness) from stories.json — 35 news stories, every one verified
 // as having happened or first been reported on 25 November 2026, each
 // with its source — plus a Natural Earth world outline
-// (land-110m.geojson, public domain). Re-running render.py writes
-// byte-identical output, and this program copies those same bytes to
-// the output directory, so the run is deterministic.
+// (land-110m.geojson, public domain). This is the v2 rendering:
+// a cream-paper broadsheet rebuilt by studying the previous day's
+// winning entries — Didone serif masthead, italic ticker, 6-number
+// strip, UTC timeline, 3 illustrated hero stories, 8 medium stories
+// in a grid, a world map with numbered pins, a 24-story list, and a
+// DATE CHECK footer that adjudicates borderline cases (the Riyadh
+// tower strike and the Nvidia sell-off were Tuesday events with
+// Wednesday developments). Re-running render.py writes byte-identical
+// output, and this program copies those same bytes to the output
+// directory, so the run is deterministic.
 //
 // Run it the way the grader does:
 //   mkdir -p out && MAKEFUN_BOT_DIR=. MAKEFUN_OUTPUT_DIR=out node main.ts
