@@ -1,27 +1,34 @@
 #!/usr/bin/env python3
-"""Render v2 of the news-image-20261125 entry: a broadsheet front page.
+"""Render v3 of the news-image entry: the 'extreme' broadsheet.
 
-Rebuilt by studying the winning entries (gentle-koala-36 11-24, regian
-11-23, wu-san / noble-koala / malapetakasatu / illyash22 11-25):
-cream paper, Didone serif masthead, italic ticker, 6-number strip,
-UTC timeline, 3 illustrated hero scenes, 4x2 medium grid, world map
-with region-coloured pins, dense ALSO list, DATE CHECK footer with
-borderline adjudication and a confidence legend.
+Built on v2 (cream paper, Didone masthead, ticker, 6-number strip,
+UTC timeline, heroes, map, ALSO list, DATE CHECK) and pushed toward
+what the 11-25 leaders do:
+  - 50 stories: 3 heroes + 13 cards with mini scene strips + 34 ALSO
+    one-liners (2 cols x 17 rows), after noble-koala (50 stories).
+  - 8 vector scenes: 3 hero scenes + 'THE DAY IN EIGHT' 4x2 small
+    scenes, after wu-san (8 drawn scenes).
+  - Full UTC timeline built from each story's time_utc field, after
+    malapetakasatu (UTC Timeline & Date-Check Audit).
+  - DATE CHECK with borderline adjudication + confidence legend,
+    after gentle-koala-36 (Hormuz ruling).
+  - Real vector world map (Natural Earth polygons) with pins.
 
-Same stories.json as v1 (35 stories, 25 Nov 2026) - only the rendering
-changed. Deterministic: same input files -> same bytes out. No network,
-no clock, no randomness (seeded PRNG only). Reads stories.json +
-land-110m.geojson from its own directory, writes entry.png (1024x1024).
+Usage: python3 render_v3.py [stories.json] [out.png]
+Deterministic: same input files -> same bytes out. No network, no
+clock, no randomness (seeded PRNG only). Reads the stories file +
+land-110m.geojson, writes a 1024x1024 PNG.
 """
 import json
 import math
 import os
 import random
+import sys
 
 from PIL import Image, ImageDraw, ImageFont
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-REPO = os.path.join(HERE, "..", "repo")
+GEO = os.path.join(HERE, "..", "repo", "land-110m.geojson")
 W, H = 1024, 1024
 
 # ---- palette (sampled from the winning pages) ----
@@ -29,7 +36,6 @@ PAPER = (246, 241, 231)
 PAPER2 = (251, 248, 240)
 INK = (18, 18, 18)
 RED = (168, 30, 30)
-DARKRED = (140, 22, 22)
 GRAY = (96, 96, 94)
 RULE = (70, 70, 70)
 LIGHT_RULE = (190, 182, 165)
@@ -105,7 +111,33 @@ def status_badge(s):
     """Confidence badge derived honestly from the source list:
     2+ named outlets -> CONFIRMED, 1 outlet -> REPORTED."""
     n = len([p for p in s["source"].split("·") if p.strip()])
-    return ("CONFIRMED", (14, 122, 107)) if n >= 2 else ("REPORTED", (194, 94, 0))
+    return ("CONFIRMED", (14, 122, 107)) if n >= 2 else ("REPORTED",
+                                                        (194, 94, 0))
+
+
+def parse_hhmm(t):
+    """'HH:MM' -> minutes since midnight, or None."""
+    try:
+        hh, mm = t.split(":")
+        return int(hh) * 60 + int(mm)
+    except Exception:
+        return None
+
+
+def parse_day(date_str):
+    """'Wednesday 25 November 2026' -> (weekday abbr, day-of-year)."""
+    import datetime
+    try:
+        dt = datetime.datetime.strptime(date_str, "%A %d %B %Y")
+        return dt.strftime("%a").upper(), dt.timetuple().tm_yday
+    except Exception:
+        return "WED", 329
+    """'HH:MM' -> minutes since midnight, or None."""
+    try:
+        hh, mm = t.split(":")
+        return int(hh) * 60 + int(mm)
+    except Exception:
+        return None
 
 
 # ---------------------------------------------------------------- scenes
@@ -120,22 +152,25 @@ def night_sky(d, x, y, w, h, seed, glow_y=None):
         d.line([(x, y + i), (x + w, y + i)],
                fill=tuple(int(c0[k] + (c1[k] - c0[k]) * f) for k in range(3)))
     if glow_y is not None:
-        for r in range(26, 0, -2):
-            d.ellipse([x + w // 2 - r * 3, glow_y - r,
-                       x + w // 2 + r * 3, glow_y + r],
+        # glow radius scaled to the scene height and clamped inside it:
+        # a fixed 26px glow spills far outside 18px card strips.
+        r_max = max(4, min(26, h // 3))
+        gy = min(glow_y, y + h - r_max)
+        gy = max(gy, y + r_max)
+        for r in range(r_max, 0, -2):
+            d.ellipse([x + w // 2 - r * 3, gy - r,
+                       x + w // 2 + r * 3, gy + r],
                       fill=(176, 84, 30))
     rnd = random.Random(seed)
     for _ in range(26):
         sx = x + rnd.randint(3, w - 3)
-        sy = y + rnd.randint(3, h - 24)
+        sy = y + rnd.randint(3, max(4, h - 6))
         r = rnd.choice([1, 1, 2])
         d.ellipse([sx, sy, sx + r, sy + r], fill=(255, 255, 255))
 
-
 def draw_scene_riyadh(d, x, y, w, h):
-    """Night: PIF tower hit, fire burst halfway up, skyline silhouette."""
+    """Night: tower hit, fire burst halfway up, skyline silhouette."""
     night_sky(d, x, y, w, h, seed=7, glow_y=y + h - 20)
-    # skyline silhouette
     rnd = random.Random(11)
     bx = x + 4
     while bx < x + w - 18:
@@ -148,7 +183,6 @@ def draw_scene_riyadh(d, x, y, w, h):
                 d.point([(bx + 4, wy), (bx + bw - 5, wy)],
                         fill=(255, 210, 110))
         bx += bw + 4
-    # PIF tower: tapered, pale, diagonal ribs
     cx = x + w // 2
     top_y, bot_y = y + 10, y + h - 18
     d.polygon([(cx - 12, top_y), (cx + 12, top_y),
@@ -159,7 +193,6 @@ def draw_scene_riyadh(d, x, y, w, h):
                width=2)
     for wy in range(top_y + 20, bot_y - 6, 10):
         d.point([(cx - 6, wy), (cx + 6, wy)], fill=(255, 220, 120))
-    # impact burst halfway up the tower
     bx0, by0 = cx + 20, top_y + 52
     for r, col in ((16, (255, 120, 20)), (11, (255, 176, 32)),
                    (6, (255, 230, 120))):
@@ -169,7 +202,6 @@ def draw_scene_riyadh(d, x, y, w, h):
         d.line([(bx0, by0),
                 (bx0 + 22 * math.cos(a), by0 + 22 * math.sin(a))],
                fill=(255, 176, 32), width=2)
-    # drone dots approaching
     for dx, dy in ((-52, -14), (-38, -22), (-24, -10)):
         d.ellipse([cx + dx - 2, top_y + 30 + dy, cx + dx + 2, top_y + 30 + dy],
                   fill=(255, 255, 255))
@@ -177,9 +209,7 @@ def draw_scene_riyadh(d, x, y, w, h):
 
 
 def draw_scene_solomons(d, x, y, w, h, polys):
-    """Pacific mini-map: SE Australia + Solomons, dashed Canberra-Honiara
-    route, NO FOREIGN BASES callout. Land from Natural Earth polygons.
-    Drawn on a temp layer so polygons clip cleanly at the panel edge."""
+    """Pacific mini-map: SE Australia + Solomons, dashed route, callout."""
     layer = Image.new("RGB", (w, h), (206, 224, 234))
     dl = ImageDraw.Draw(layer)
     lon0, lon1, lat0, lat1 = 140.0, 166.0, -40.0, -4.0
@@ -194,7 +224,6 @@ def draw_scene_solomons(d, x, y, w, h, polys):
         if len(pts) >= 3:
             dl.polygon(pts, fill=(232, 222, 192), outline=(170, 160, 130))
     d._image.paste(layer, (x, y))
-    # route Canberra -> Honiara (dashed)
     c0 = (x + proj(149.13, -35.28)[0], y + proj(149.13, -35.28)[1])
     c1 = (x + proj(159.97, -9.65)[0], y + proj(159.97, -9.65)[1])
     steps = 24
@@ -212,7 +241,6 @@ def draw_scene_solomons(d, x, y, w, h, polys):
         d.ellipse([px - 5, py - 5, px + 5, py + 5], fill=RED, outline=WHITE,
                   width=2)
         d.text((px + lx, py + ly), label, font=font(F_SANS_B, 9), fill=INK)
-    # callout
     cx0, cy0 = x + w - 138, y + h - 30
     d.rectangle([cx0, cy0, cx0 + 130, cy0 + 22], fill=WHITE,
                 outline=RED, width=2)
@@ -224,18 +252,15 @@ def draw_scene_shenzhou(d, x, y, w, h):
     """Night launch: rocket on pad, flame, smoke, 00:18 UTC badge."""
     night_sky(d, x, y, w, h, seed=23, glow_y=y + h - 16)
     cx = x + w // 2
-    # launch pad + tower
     d.rectangle([x, y + h - 14, x + w, y + h], fill=(24, 28, 34))
     d.rectangle([cx - 34, y + int(h * 0.26), cx - 28, y + h - 14],
                 fill=(90, 96, 104))
     d.rectangle([cx + 28, y + int(h * 0.38), cx + 34, y + h - 14],
                 fill=(90, 96, 104))
-    # smoke
     for ox, oy, r in ((-26, 0.84, 13), (26, 0.88, 15), (0, 0.92, 17)):
         oy = y + int(h * oy)
         d.ellipse([cx + ox - r, oy - r, cx + ox + r, oy + r],
                   fill=(190, 195, 200))
-    # flame + rocket body (fractions of h so the scene scales)
     body_top = y + int(h * 0.24)
     body_bot = y + int(h * 0.72)
     d.polygon([(cx - 9, body_bot), (cx + 9, body_bot), (cx, y + h - 2)],
@@ -252,11 +277,141 @@ def draw_scene_shenzhou(d, x, y, w, h):
                (cx + 11, body_bot)], fill=(200, 40, 40))
     d.ellipse([cx - 5, body_top + 12, cx + 5, body_top + 22],
               fill=(120, 190, 230), outline=(60, 60, 60))
-    # 00:18 UTC badge
     bx0, by0 = x + w - 86, y + 8
     d.rectangle([bx0, by0, bx0 + 78, by0 + 18], fill=(10, 22, 44))
     d.text((bx0 + 7, by0 + 3), "00:18 UTC", font=font(F_SANS_B, 11),
            fill=WHITE)
+
+
+# ---------------------------------------------------------------- mini scenes
+def mini_scene(d, x, y, w, h, kind, seed):
+    """Small flat vector scene for card strips and THE DAY IN EIGHT.
+    kind picks the motif; everything is seeded so it is deterministic."""
+    rnd = random.Random(seed)
+    if kind == "fire":
+        night_sky(d, x, y, w, h, seed=seed + 1, glow_y=y + h - 6)
+        bx = x + w // 2
+        for r, col in ((h // 2, (255, 120, 20)), (h // 3, (255, 176, 32)),
+                       (h // 5, (255, 230, 120))):
+            d.ellipse([bx - r, y + h - r - 4, bx + r, y + h - 4], fill=col)
+        d.rectangle([x, y + h - 5, x + w, y + h], fill=(16, 32, 60))
+    elif kind == "sea":
+        d.rectangle([x, y, x + w, y + h], fill=(206, 224, 234))
+        for i in range(3):
+            yy = y + h * (0.35 + i * 0.22)
+            d.line([(x, yy), (x + w, yy)], fill=(90, 140, 180), width=2)
+        sx = x + w // 2
+        d.polygon([(sx - w * 0.28, y + h * 0.62), (sx + w * 0.28, y + h * 0.62),
+                   (sx + w * 0.2, y + h * 0.85), (sx - w * 0.2, y + h * 0.85)],
+                  fill=(40, 60, 90))
+        d.rectangle([sx - 4, y + h * 0.2, sx + 14, y + h * 0.62],
+                    fill=(40, 60, 90))
+    elif kind == "rocket":
+        night_sky(d, x, y, w, h, seed=seed + 2, glow_y=y + h - 4)
+        cx = x + w // 2
+        d.polygon([(cx - 4, y + h * 0.55), (cx + 4, y + h * 0.55),
+                   (cx, y + h - 2)], fill=(255, 140, 20))
+        d.rectangle([cx - 5, y + h * 0.18, cx + 5, y + h * 0.55],
+                    fill=(235, 238, 242))
+        d.polygon([(cx - 5, y + h * 0.18), (cx + 5, y + h * 0.18),
+                   (cx, y + 2)], fill=(200, 40, 40))
+        d.rectangle([x, y + h - 4, x + w, y + h], fill=(24, 28, 34))
+    elif kind == "court":
+        d.rectangle([x, y, x + w, y + h], fill=(233, 224, 196))
+        for i in range(3):
+            cx = x + w * (0.22 + i * 0.28)
+            d.rectangle([cx - 3, y + h * 0.25, cx + 3, y + h * 0.85],
+                        fill=(120, 100, 70))
+        d.rectangle([x + w * 0.08, y + h * 0.15, x + w * 0.92, y + h * 0.25],
+                    fill=(90, 75, 50))
+        d.rectangle([x + w * 0.08, y + h * 0.85, x + w * 0.92, y + h * 0.95],
+                    fill=(90, 75, 50))
+    elif kind == "deal":
+        d.rectangle([x, y, x + w, y + h], fill=(214, 228, 238))
+        d.rectangle([x + w * 0.3, y + h * 0.2, x + w * 0.7, y + h * 0.8],
+                    fill=WHITE, outline=(31, 78, 156), width=2)
+        for i in range(3):
+            d.line([(x + w * 0.36, y + h * (0.32 + i * 0.16)),
+                    (x + w * 0.64, y + h * (0.32 + i * 0.16))],
+                   fill=(31, 78, 156), width=2)
+        d.ellipse([x + w * 0.58, y + h * 0.6, x + w * 0.68, y + h * 0.72],
+                  fill=RED)
+    elif kind == "chart":
+        d.rectangle([x, y, x + w, y + h], fill=(251, 248, 240))
+        d.line([(x + 4, y + h - 6), (x + w - 4, y + h - 6)], fill=INK, width=2)
+        d.line([(x + 4, y + h - 6), (x + 4, y + 4)], fill=INK, width=2)
+        pts = [(x + 6 + i * (w - 12) / 4, y + h * (0.3 + 0.14 * i))
+               for i in range(5)]
+        for a, b in zip(pts, pts[1:]):
+            d.line([a, b], fill=RED, width=3)
+    elif kind == "flag":
+        d.rectangle([x, y, x + w, y + h], fill=(233, 224, 196))
+        d.line([(x + w * 0.2, y + 3), (x + w * 0.2, y + h - 3)], fill=INK,
+               width=2)
+        d.polygon([(x + w * 0.2, y + 3), (x + w * 0.75, y + h * 0.25),
+                   (x + w * 0.2, y + h * 0.5)], fill=RED)
+        for i in range(6):
+            cx = x + w * (0.15 + 0.13 * i)
+            d.ellipse([cx - 3, y + h - 9, cx + 3, y + h - 3],
+                      fill=(40, 60, 90))
+    elif kind == "burst":
+        night_sky(d, x, y, w, h, seed=seed + 3)
+        cx, cy = x + w // 2, y + h // 2
+        for ang in range(0, 360, 30):
+            a = math.radians(ang)
+            d.line([(cx, cy), (cx + h * 0.45 * math.cos(a),
+                               cy + h * 0.45 * math.sin(a))],
+                   fill=(255, 176, 32), width=2)
+        d.ellipse([cx - 6, cy - 6, cx + 6, cy + 6], fill=(255, 230, 120))
+    elif kind == "forest":
+        d.rectangle([x, y, x + w, y + h], fill=(206, 224, 200))
+        for i in range(5):
+            cx = x + w * (0.12 + i * 0.19)
+            hh = h * (0.4 + 0.12 * ((i * 7) % 3))
+            d.polygon([(cx, y + h - hh), (cx - 7, y + h - 8),
+                       (cx + 7, y + h - 8)], fill=(46, 125, 50))
+        d.rectangle([x, y + h - 8, x + w, y + h], fill=(90, 75, 50))
+    elif kind == "train":
+        d.rectangle([x, y, x + w, y + h], fill=(214, 228, 238))
+        cx = x + w // 2
+        d.rounded_rectangle([cx - w * 0.2, y + h * 0.15, cx + w * 0.2,
+                             y + h * 0.9], radius=4, fill=(31, 78, 156))
+        d.rectangle([cx - w * 0.13, y + h * 0.25, cx + w * 0.13, y + h * 0.45],
+                    fill=WHITE)
+        d.line([(x + 4, y + h - 4), (x + w - 4, y + h - 4)], fill=INK, width=2)
+    else:  # "city": night skyline
+        night_sky(d, x, y, w, h, seed=seed + 4, glow_y=y + h - 4)
+        bx = x + 3
+        while bx < x + w - 10:
+            bw = rnd.randint(8, 16)
+            bh = rnd.randint(int(h * 0.3), int(h * 0.7))
+            d.rectangle([bx, y + h - 4 - bh, bx + bw, y + h - 4],
+                        fill=(10, 22, 44))
+            bx += bw + 3
+        d.rectangle([x, y + h - 4, x + w, y + h], fill=(16, 32, 60))
+
+
+def scene_for(story):
+    """Pick a mini-scene kind from a story's art field or keywords."""
+    art = (story.get("art") or "").lower()
+    if art in ("tower", "fire", "sea", "rocket", "court", "deal", "chart",
+               "flag", "burst", "forest", "train", "city"):
+        return art
+    text = ((story.get("headline") or "") + " " +
+            (story.get("body") or "") + " " +
+            (story.get("text") or "")).lower()
+    for kw, kind in (("fire", "fire"), ("burn", "fire"), ("blast", "burst"),
+                     ("strike", "burst"), ("ship", "sea"), ("port", "sea"),
+                     ("launch", "rocket"), ("space", "rocket"),
+                     ("court", "court"), ("trial", "court"),
+                     ("deal", "deal"), ("pact", "deal"), ("sign", "deal"),
+                     ("stock", "chart"), ("market", "chart"),
+                     ("forest", "forest"), ("wildfire", "forest"),
+                     ("train", "train"), ("metro", "train"),
+                     ("flag", "flag"), ("protest", "flag")):
+        if kw in text:
+            return kind
+    return "city"
 
 
 # ---------------------------------------------------------------- icons
@@ -337,7 +492,7 @@ ICONS = {"ship": icon_ship, "flame": icon_flame, "chart": icon_chart_down,
 
 
 def load_land():
-    with open(os.path.join(REPO, "land-110m.geojson")) as f:
+    with open(GEO) as f:
         gj = json.load(f)
     polys = []
     for feat in gj["features"]:
@@ -357,56 +512,45 @@ def load_land():
     return polys
 
 # ---------------------------------------------------------------- layout
-MEDIUM_META = {
-    4: ("ship", "PORT", "HIT", "WAR"),
-    5: ("train", "DEAL", "STRIKE OFF", "LABOUR"),
-    6: ("flag", "70+", "BOATS SUNK", "SECURITY"),
-    7: ("doc", "SECRETS", "FOR SALE", "ESPIONAGE"),
-    8: ("chart", "-5.86%", "NVIDIA", "MARKETS"),
-    9: ("flag", "€45bn", "UKRAINE LOAN", "BUDGET"),
-    10: ("ship", "2", "SHIPS HIT", "WAR"),
-    11: ("flame", "4", "KILLED", "WAR"),
-}
-
 HERO_TOPIC = {1: "STRIKE", 2: "TREATY", 3: "SPACE"}
 
 # pin nudges (story n -> dx, dy) to unclump the map
 PIN_NUDGE = {1: (14, -8), 4: (-14, 8), 7: (-13, 9), 8: (13, -9),
              10: (-6, 8), 11: (8, -10)}
 
-# timeline: only times verified against named outlets (see report)
-TIMELINE = [
-    ("00:18", "Shenzhou-24 lifts off"),
-    ("02:20", "Kospi -5.54% at 11:20 Seoul"),
-]
 
-NUMBERS = [
-    ("11", "hurt in Riyadh tower strike"),
-    ("€45bn", "Ukraine loan on the table"),
-    ("74,746", "Gaza death toll, WAFA says"),
-    ("200 yrs", "Mackenzie jail term"),
-    ("72", "orangutans rescued"),
-    ("-5.54%", "KOSPI's Wednesday fall"),
-]
-
-DATECHECK = (
-    "Every story here happened or was first reported on Wed 25 Nov 2026, "
-    "as the named outlets reported it. Borderline: the Riyadh tower was "
-    "struck Tue 24 Nov — the Houthi claim and the Hodeidah reply came "
-    "Wed; Nvidia's -5.86% was Tuesday's US session."
-)
-
-# ticker in proper case (same three lead stories as the mains)
-TICKER = ("Houthis hit Riyadh tower — 11 hurt  ◆  Solomons sign pact: "
-          "no foreign bases  ◆  Shenzhou-24 lifts off with first Pakistani")
+def build_timeline(data, all_stories):
+    """Full UTC timeline from per-story time_utc fields, sorted.
+    Falls back to the data file's explicit 'timeline' list, then to
+    nothing (the strip still prints the wires-read cutoff)."""
+    events = []
+    for s in all_stories:
+        t = s.get("time_utc")
+        m = parse_hhmm(t) if t else None
+        if m is not None:
+            label = s.get("headline") or s.get("text") or ""
+            events.append((m, t, label))
+    events.sort()
+    if not events and data.get("timeline"):
+        for t, label in data["timeline"]:
+            m = parse_hhmm(t)
+            if m is not None:
+                events.append((m, t, label))
+        events.sort()
+    return events
 
 
 def main():
-    with open(os.path.join(REPO, "stories.json")) as f:
+    data_path = sys.argv[1] if len(sys.argv) > 1 else os.path.join(
+        HERE, "stories.json")
+    out_path = sys.argv[2] if len(sys.argv) > 2 else os.path.join(
+        HERE, "entry_v3.png")
+    with open(data_path) as f:
         data = json.load(f)
     main_stories = data["main"]
     medium = data["medium"]
     also = data["also"]
+    eight = data.get("eight") or medium[:8]
     all_stories = main_stories + medium + also
 
     order = ["EUROPE", "MIDDLE EAST", "ASIA", "AFRICA", "AMERICAS",
@@ -416,217 +560,219 @@ def main():
         counts[s["region"]] = counts.get(s["region"], 0) + 1
     count_str = " · ".join(f"{r} {counts[r]}" for r in order
                            if counts[r] > 0)
+    n_total = len(all_stories)
+    date_str = data.get("date", "")
+    # masthead date line: 'Wednesday 25 November 2026'
+    mast = date_str
+    sub = (f"{n_total} STORIES, ALL FROM {date_str.upper()}  ·  "
+           f"{count_str}")
+    numbers = data.get("numbers", [
+        ("11", "hurt in Riyadh tower strike"),
+        ("45bn", "Ukraine loan on the table"),
+        ("74,746", "Gaza death toll, WAFA says"),
+        ("200 yrs", "Mackenzie jail term"),
+        ("72", "orangutans rescued"),
+        ("-5.54%", "KOSPI's Wednesday fall"),
+    ])
+    ticker = data.get("ticker", "")
+    if isinstance(ticker, list):
+        ticker = "  ◆  ".join(ticker[:3])
+    timeline = build_timeline(data, all_stories)
+    wires = data.get("wires_read", "")
 
     img = Image.new("RGB", (W, H), PAPER)
     d = ImageDraw.Draw(img)
     d.rectangle([0, 0, W - 1, H - 1], outline=INK, width=2)
-    MX = 16
+    MX = 14
     CW = W - 2 * MX
 
+    wd_abbr, doy = parse_day(date_str)
     # ---- top line ----
-    y = 10
+    y = 8
     f_top = font(F_SANS_B, 11)
     d.text((MX, y), "THE WORLD ON ONE PAGE", font=f_top, fill=INK)
-    c = "DAY 329 OF 2026"
+    c = f"DAY {doy} OF 2026"
     d.text(((W - d.textlength(c, font=f_top)) / 2, y), c, font=f_top,
            fill=RED)
-    r = "EVERY STORY DATED WEDNESDAY 25 NOV"
+    r = f"EVERY STORY DATED {date_str.upper()}"
     d.text((W - MX - d.textlength(r, font=f_top), y), r, font=f_top,
            fill=INK)
-    y += 17
+    y += 14
     d.line([(MX, y), (W - MX, y)], fill=INK, width=2)
-    y += 5
+    y += 4
 
     # ---- masthead ----
-    size = 60
+    size = 52
     while size > 40:
         f_mast = font(F_DISP_BLK, size)
-        tw = d.textlength("Wednesday 25 November 2026", font=f_mast)
+        tw = d.textlength(mast, font=f_mast)
         if tw <= CW:
             break
         size -= 2
-    bb = d.textbbox((0, 0), "Wednesday 25 November 2026", font=f_mast)
-    d.text(((W - tw) / 2, y - bb[1]), "Wednesday 25 November 2026",
-           font=f_mast, fill=INK)
-    y += (bb[3] - bb[1]) + 6
+    bb = d.textbbox((0, 0), mast, font=f_mast)
+    d.text(((W - tw) / 2, y - bb[1]), mast, font=f_mast, fill=INK)
+    y += (bb[3] - bb[1]) + 5
     d.line([(MX, y), (W - MX, y)], fill=INK, width=1)
-    y += 5
+    y += 4
 
     # ---- sub-line ----
-    sub = f"35 STORIES, ALL FROM WEDNESDAY 25 NOV  ·  {count_str}"
     f_sub = font(F_SANS_B, 12)
     sw = d.textlength(sub, font=f_sub)
     d.text(((W - sw) / 2, y), sub, font=f_sub, fill=INK)
-    y += 16
-    d.line([(MX, y), (W - MX, y)], fill=INK, width=1)
-    y += 4
-
-    # ---- ticker (italic serif; diamonds drawn as vector shapes:
-    # the Display italic has no U+25C6 glyph)
-    f_tick = font(F_DISP_I, 16)
-    parts = TICKER.split("  ◆  ")
-    tw = sum(d.textlength(p, font=f_tick) for p in parts) + \
-        28 * (len(parts) - 1)
-    tx = (W - tw) / 2
-    for i, p in enumerate(parts):
-        d.text((tx, y), p, font=f_tick, fill=INK)
-        tx += d.textlength(p, font=f_tick)
-        if i < len(parts) - 1:
-            cx0, cy0 = tx + 14, y + 10
-            d.polygon([(cx0, cy0 - 6), (cx0 + 6, cy0),
-                       (cx0, cy0 + 6), (cx0 - 6, cy0)], fill=RED)
-            tx += 28
-    y += 20
-    d.line([(MX, y), (W - MX, y)], fill=INK, width=1)
-    y += 4
-
-    # ---- numbers strip: 6 cells ----
-    cell_w = CW / 6
-    f_num = font(F_DISP_B, 26)
-    f_cap = font(F_SANS, 9)
-    for i, (big, small) in enumerate(NUMBERS):
-        cx = MX + i * cell_w
-        if i > 0:
-            d.line([(cx - 4, y + 2), (cx - 4, y + 40)], fill=LIGHT_RULE,
-                   width=1)
-        d.text((cx, y + 8), big, font=f_num, fill=INK)
-        bw = d.textlength(big, font=f_num)
-        cap = wrap(d, small, f_cap, cell_w - bw - 14)
-        draw_lines(d, cap[:2], cx + bw + 6, y + 10, f_cap, GRAY, 11)
-    y += 42
+    y += 13
     d.line([(MX, y), (W - MX, y)], fill=INK, width=1)
     y += 3
 
-    # ---- UTC timeline strip (verified times only) ----
-    f_tl = font(F_SANS_B, 10)
-    d.rectangle([MX, y, MX + 62, y + 16], fill=RED)
-    d.text((MX + 6, y + 3), "WED UTC", font=f_tl, fill=WHITE)
-    tx = MX + 70
-    for t, label in TIMELINE:
-        d.text((tx, y + 3), t, font=f_tl, fill=RED)
-        tx += d.textlength(t, font=f_tl) + 4
-        d.text((tx, y + 3), label, font=f_tl, fill=INK)
-        tx += d.textlength(label, font=f_tl) + 12
-        d.text((tx, y + 3), "|", font=f_tl, fill=LIGHT_RULE)
-        tx += 12
-    d.text((tx, y + 3), "WIRES READ UP TO 08:30 UTC", font=f_tl, fill=GRAY)
-    y += 18
+    # ---- ticker (italic serif; diamonds drawn as vector shapes) ----
+    if ticker:
+        f_tick = font(F_DISP_I, 15)
+        parts = ticker.split("  ◆  ")
+        # shrink the longest part until the whole ticker fits the page
+        for _ in range(40):
+            tw = sum(d.textlength(p, font=f_tick) for p in parts) + \
+                26 * (len(parts) - 1)
+            if tw <= CW:
+                break
+            i = max(range(len(parts)),
+                    key=lambda j: d.textlength(parts[j], font=f_tick))
+            words = parts[i].split()
+            if len(words) > 2:
+                parts[i] = " ".join(words[:-1]) + " …"
+            else:
+                parts[i] = parts[i][:max(4, len(parts[i]) - 4)] + " …"
+        tw = sum(d.textlength(p, font=f_tick) for p in parts) + \
+            26 * (len(parts) - 1)
+        tx = (W - tw) / 2
+        for i, p in enumerate(parts):
+            d.text((tx, y), p, font=f_tick, fill=INK)
+            tx += d.textlength(p, font=f_tick)
+            if i < len(parts) - 1:
+                cx0, cy0 = tx + 13, y + 9
+                d.polygon([(cx0, cy0 - 5), (cx0 + 5, cy0),
+                           (cx0, cy0 + 5), (cx0 - 5, cy0)], fill=RED)
+                tx += 26
+        y += 17
+        d.line([(MX, y), (W - MX, y)], fill=INK, width=1)
+        y += 3
+
+    # ---- numbers strip: 6 cells ----
+    cell_w = CW / 6
+    f_num = font(F_DISP_B, 22)
+    f_cap = font(F_SANS, 9)
+    for i, (big, small) in enumerate(numbers[:6]):
+        cx = MX + i * cell_w
+        if i > 0:
+            d.line([(cx - 4, y + 2), (cx - 4, y + 36)], fill=LIGHT_RULE,
+                   width=1)
+        d.text((cx, y + 6), big, font=f_num, fill=INK)
+        bw = d.textlength(big, font=f_num)
+        cap = wrap(d, small, f_cap, cell_w - bw - 12)
+        draw_lines(d, cap[:2], cx + bw + 5, y + 8, f_cap, GRAY, 11)
+    y += 30
     d.line([(MX, y), (W - MX, y)], fill=INK, width=1)
-    y += 6
+    y += 3
+
+    # ---- UTC timeline strip: full 00:00-24:00 axis, event dots ----
+    f_tl = font(F_SANS_B, 10)
+    d.rectangle([MX, y, MX + 58, y + 14], fill=RED)
+    d.text((MX + 5, y + 2), f"{wd_abbr} UTC", font=f_tl, fill=WHITE)
+    axis_x0, axis_x1 = MX + 66, W - MX
+    axis_y = y + 10
+    d.line([(axis_x0, axis_y), (axis_x1, axis_y)], fill=LIGHT_RULE, width=1)
+    for hh in range(0, 25, 4):
+        px = axis_x0 + (axis_x1 - axis_x0) * hh / 24.0
+        d.line([(px, axis_y - 3), (px, axis_y + 3)], fill=GRAY, width=1)
+        lab = f"{hh:02d}:00"
+        lw = d.textlength(lab, font=font(F_SANS, 8))
+        lx = min(max(px - lw / 2, MX), W - MX - lw)
+        d.text((lx, y + 1), lab, font=font(F_SANS, 8), fill=GRAY)
+    for m, t, label in timeline:
+        px = axis_x0 + (axis_x1 - axis_x0) * m / 1440.0
+        d.ellipse([px - 3, axis_y - 3, px + 3, axis_y + 3], fill=RED,
+                  outline=WHITE, width=1)
+    y += 15
+    # event labels under the axis (max 6, earliest first, truncated)
+    f_ev = font(F_SANS, 9)
+    shown = timeline[:6]
+    ex = axis_x0
+    for m, t, label in shown:
+        if len(label) > 26:
+            label = label[:23].rsplit(" ", 1)[0] + " …"
+        item = f"{t} {label}"
+        iw = d.textlength(item, font=f_ev)
+        if ex + iw > axis_x1:
+            break
+        d.text((ex, y), t, font=font(F_SANS_B, 9), fill=RED)
+        ex += d.textlength(t, font=font(F_SANS_B, 9)) + 3
+        d.text((ex, y), label, font=f_ev, fill=INK)
+        ex += d.textlength(label, font=f_ev) + 10
+        d.text((ex, y), "|", font=f_ev, fill=LIGHT_RULE)
+        ex += 8
+    if wires:
+        d.text((axis_x1 - d.textlength(wires, font=f_ev), y), wires,
+               font=f_ev, fill=GRAY)
+    y += 11
+    d.line([(MX, y), (W - MX, y)], fill=INK, width=1)
+    y += 5
 
     # ---- heroes ----
     polys = load_land()
-    col_w, gap = 320, 16
+    col_w, gap = 322, 15
     art_h = 92
     hero_bottom = y
     for i, s in enumerate(main_stories):
         x = MX + i * (col_w + gap)
         col = REGION_COLORS[s["region"]]
-        if s["art"] == "tower":
+        art = (s.get("art") or "").lower()
+        if art == "tower":
             draw_scene_riyadh(d, x, y, col_w, art_h)
-        elif s["art"] == "treaty":
+        elif art == "treaty":
             draw_scene_solomons(d, x, y, col_w, art_h, polys)
-        else:
+        elif art == "rocket":
             draw_scene_shenzhou(d, x, y, col_w, art_h)
+        else:
+            mini_scene(d, x, y, col_w, art_h, scene_for(s), 100 + i)
         d.rectangle([x, y, x + col_w, y + art_h], outline=INK, width=1)
-        yy = y + art_h + 6
-        # kicker chip + number + place
-        kick = f"{s['region']} · {HERO_TOPIC[s['n']]}"
+        yy = y + art_h + 4
+        kick = f"{s['region']} · {HERO_TOPIC.get(s['n'], 'NEWS')}"
         f_kick = font(F_SANS_B, 10)
         kw = d.textlength(kick, font=f_kick) + 12
-        d.rectangle([x, yy, x + kw, yy + 16], fill=col)
-        d.text((x + 6, yy + 3), kick, font=f_kick, fill=WHITE)
-        bx = x + kw + 6
-        d.ellipse([bx, yy, bx + 16, yy + 16], fill=INK)
+        d.rectangle([x, yy, x + kw, yy + 15], fill=col)
+        d.text((x + 6, yy + 2), kick, font=f_kick, fill=WHITE)
+        bx = x + kw + 5
+        d.ellipse([bx, yy, bx + 15, yy + 15], fill=INK)
         num = str(s["n"])
         nw = d.textlength(num, font=font(F_SANS_B, 10))
-        d.text((bx + 8 - nw / 2, yy + 3), num, font=font(F_SANS_B, 10),
+        d.text((bx + 7 - nw / 2, yy + 2), num, font=font(F_SANS_B, 10),
                fill=WHITE)
-        d.text((bx + 22, yy + 2), s["place"], font=font(F_SANS_B, 11),
+        d.text((bx + 20, yy + 1), s["place"], font=font(F_SANS_B, 11),
                fill=INK)
-        yy += 22
-        # headline (serif display, max 3 lines)
-        f_hl = font(F_DISP_B, 23)
+        yy += 20
+        f_hl = font(F_DISP_B, 21)
         hl = wrap(d, s["headline"], f_hl, col_w)
-        assert len(hl) <= 3, f"hero headline {len(hl)} lines: {s['n']}"
-        yy = draw_lines(d, hl, x, yy, f_hl, INK, 25)
-        yy += 3
-        # body (serif, max 2 lines, truncated - winners run ~2 lines)
+        assert len(hl) <= 2, f"hero headline {len(hl)} lines: {s['n']}"
+        yy = draw_lines(d, hl, x, yy, f_hl, INK, 21)
+        yy += 2
         f_body = font(F_SERIF, 11)
         bl = wrap(d, s["body"], f_body, col_w)
         bl = trunc_lines(bl, 2, col_w, d, f_body)
-        yy = draw_lines(d, bl, x, yy, f_body, (40, 40, 40), 14)
-        yy += 4
-        # source + status badge
+        yy = draw_lines(d, bl, x, yy, f_body, (40, 40, 40), 12)
+        yy += 3
         badge, bcol = status_badge(s)
         f_src = font(F_SANS_B, 9)
         d.text((x, yy), s["source"], font=f_src, fill=GRAY)
         bw = d.textlength(badge, font=f_src)
         d.rectangle([x + col_w - bw - 10, yy - 1,
-                     x + col_w, yy + 12], fill=bcol)
+                     x + col_w, yy + 11], fill=bcol)
         d.text((x + col_w - bw - 5, yy + 1), badge, font=f_src, fill=WHITE)
-        yy += 12
+        yy += 11
         hero_bottom = max(hero_bottom, yy)
-    y = hero_bottom + 8
+    y = hero_bottom + 6
 
-    # ---- medium grid: 4 cols x 2 rows ----
-    d.text((MX, y), "THE DAY IN EIGHT", font=font(F_SANS_B, 12), fill=INK)
-    d.text((W - MX - d.textlength("EVERY PICTURE DATED, EVERY STORY SOURCED",
-                                  font=font(F_SANS_B, 10)), y + 1),
-           "EVERY PICTURE DATED, EVERY STORY SOURCED",
-           font=font(F_SANS_B, 10), fill=GRAY)
-    y += 16
-    mcol_w, mgap = 238, 13
-    cell_h = 96
-    for i, s in enumerate(medium):
-        col_i, row_i = i % 4, i // 4
-        x = MX + col_i * (mcol_w + mgap)
-        ry = y + row_i * cell_h
-        col = REGION_COLORS[s["region"]]
-        d.line([(x, ry), (x + mcol_w, ry)], fill=col, width=3)
-        icon, big, cap, topic = MEDIUM_META[s["n"]]
-        # left stat column
-        ICONS[icon](d, x + 2, ry + 10, 22, col)
-        f_big = font(F_SANS_B, 13)
-        bl2 = wrap(d, big, f_big, 54)
-        draw_lines(d, bl2[:1], x, ry + 36, f_big, INK, 15)
-        f_cap = font(F_SANS, 8)
-        cl = wrap(d, cap, f_cap, 54)
-        draw_lines(d, cl[:2], x, ry + 52, f_cap, GRAY, 10)
-        # right column
-        tx = x + 60
-        f_mk = font(F_SANS_B, 10)
-        d.ellipse([tx, ry + 8, tx + 14, ry + 22], fill=INK)
-        num = str(s["n"])
-        nw = d.textlength(num, font=font(F_SANS_B, 9))
-        d.text((tx + 7 - nw / 2, ry + 10), num, font=font(F_SANS_B, 9),
-               fill=WHITE)
-        d.text((tx + 18, ry + 9),
-               f"{s['place']} · {topic}", font=f_mk, fill=col)
-        # headline: 13px, fall back to 12 if it wraps to 3 lines
-        f_mh = font(F_SANS_B, 13)
-        hl = wrap(d, s["headline"], f_mh, mcol_w - 60)
-        if len(hl) > 2:
-            f_mh = font(F_SANS_B, 12)
-            hl = wrap(d, s["headline"], f_mh, mcol_w - 60)
-        assert len(hl) <= 2, f"medium headline {len(hl)} lines: {s['n']}"
-        yy = draw_lines(d, hl[:2], tx, ry + 26, f_mh, INK, 16)
-        f_mb = font(F_SANS, 10)
-        bl = wrap(d, s["body"], f_mb, mcol_w - 60)
-        bl = trunc_lines(bl, 2, mcol_w - 60, d, f_mb)
-        yy = draw_lines(d, bl, tx, yy + 2, f_mb, (40, 40, 40), 12)
-        d.text((tx, ry + 86), s["source"], font=font(F_SANS_B, 8),
-               fill=GRAY)
-    y += 2 * cell_h + 6
-
-    # ---- map + legend ----
-    d.rectangle([MX, y, MX + 168, y + 17], fill=INK)
-    d.text((MX + 8, y + 3), "WHERE IT HAPPENED", font=font(F_SANS_B, 11),
-           fill=WHITE)
-    d.text((MX + 178, y + 3), "pins carry the story numbers",
-           font=font(F_DISP_I, 11), fill=GRAY)
-    y += 20
-    map_x, map_w, map_h = MX, 600, 100
+    # ---- map strip: real vector land + pins, legend at right ----
+    # (the label chip overlaps the map's top-left corner: no extra row)
+    map_h = 96
+    map_x, map_w = MX, 640
     d.rectangle([map_x, y, map_x + map_w, y + map_h], fill=MAP_SEA)
     for ring in polys:
         pts = []
@@ -639,55 +785,125 @@ def main():
         if len(pts) >= 3:
             d.polygon(pts, fill=MAP_LAND, outline=MAP_LINE)
     for s in main_stories + medium:
+        if "lon" not in s or "lat" not in s:
+            continue
         px = map_x + (s["lon"] + 180) / 360.0 * map_w
         py = y + (78 - s["lat"]) / 138.0 * map_h
         dx, dy = PIN_NUDGE.get(s["n"], (0, 0))
+        # deterministic declutter: spread any geographic cluster
+        dx += ((s["n"] * 13) % 17) - 8
+        dy += ((s["n"] * 7) % 13) - 6
         px, py = px + dx, py + dy
         col = REGION_COLORS[s["region"]]
-        d.ellipse([px - 8, py - 8, px + 8, py + 8], fill=col,
+        d.ellipse([px - 6, py - 6, px + 6, py + 6], fill=col,
                   outline=WHITE, width=2)
         num = str(s["n"])
-        nw = d.textlength(num, font=font(F_SANS_B, 9))
-        d.text((px - nw / 2, py - 5), num, font=font(F_SANS_B, 9),
+        nw = d.textlength(num, font=font(F_SANS_B, 7))
+        d.text((px - nw / 2, py - 4), num, font=font(F_SANS_B, 7),
                fill=WHITE)
-    # legend box right of map
-    lx, lw = map_x + map_w + 16, CW - map_w - 16
+    lx, lw = map_x + map_w + 12, CW - map_w - 12
     d.rectangle([lx, y, lx + lw, y + map_h], fill=PAPER2,
                 outline=LIGHT_RULE, width=1)
-    ly = y + 8
-    d.text((lx + 10, ly), "HOW TO READ THIS PAGE", font=font(F_SANS_B, 10),
+    ly = y + 5
+    d.text((lx + 8, ly), "HOW TO READ THIS PAGE", font=font(F_SANS_B, 9),
            fill=INK)
-    ly += 16
+    ly += 13
     regs = [(r, counts[r]) for r in order if counts[r] > 0]
     for j, (r, c) in enumerate(regs):
-        ex = lx + 10 + (j % 2) * 180
-        ey = ly + (j // 2) * 14
-        d.rectangle([ex, ey + 2, ex + 9, ey + 11],
-                    fill=REGION_COLORS[r])
-        d.text((ex + 13, ey), f"{r} {c}", font=font(F_SANS, 10), fill=INK)
-    ly += ((len(regs) + 1) // 2) * 14 + 4
-    d.line([(lx + 10, ly), (lx + lw - 10, ly)], fill=LIGHT_RULE, width=1)
-    ly += 5
-    d.text((lx + 10, ly), "CONFIRMED = 2+ outlets  ·  REPORTED = one wire",
-           font=font(F_SANS, 9), fill=GRAY)
-    ly += 13
-    d.text((lx + 10, ly), "Maps and drawings are original vector art.",
-           font=font(F_DISP_I, 10), fill=GRAY)
-    y += map_h + 8
+        ex = lx + 8 + (j % 3) * 112
+        ey = ly + (j // 3) * 12
+        d.rectangle([ex, ey + 1, ex + 8, ey + 10], fill=REGION_COLORS[r])
+        d.text((ex + 11, ey), f"{r} {c}", font=font(F_SANS, 9), fill=INK)
+    ly += ((len(regs) + 2) // 3) * 12 + 2
+    d.text((lx + 8, ly), "CONFIRMED = 2+ outlets  ·  REPORTED = one wire",
+           font=font(F_SANS, 8), fill=GRAY)
+    ly += 12
+    d.text((lx + 8, ly), "MAP: NATURAL EARTH 110M", font=font(F_SANS, 8),
+           fill=GRAY)
+    ly += 11
+    d.text((lx + 8, ly), "EVERY PIN IS A STORY ON THIS PAGE",
+           font=font(F_SANS, 8), fill=GRAY)
+    # label chip on top of the map corner (drawn last so it sits above)
+    d.rectangle([map_x, y, map_x + 96, y + 14], fill=INK)
+    d.text((map_x + 6, y + 2), "WHERE IT HAPPENED",
+           font=font(F_SANS_B, 9), fill=WHITE)
+    d.text((map_x + 102, y + 2), "pins carry the story numbers",
+           font=font(F_DISP_I, 10), fill=INK)
+    y += map_h + 5
 
-    # ---- ALSO list: 3 cols x 8 rows ----
-    d.text((MX, y), "ALSO ON WEDNESDAY 25 NOVEMBER",
-           font=font(F_SANS_B, 13), fill=INK)
-    y += 18
-    acol_w = 320
-    f_an = font(F_SANS_B, 10)
-    f_at = font(F_SANS, 10)
+    # ---- cards: 5 cols x N rows, each with a mini scene strip ----
+    d.text((MX, y), "MORE OF THE DAY", font=font(F_SANS_B, 11), fill=INK)
+    d.text((W - MX - d.textlength("EVERY PICTURE DATED, EVERY STORY SOURCED",
+                                  font=font(F_SANS_B, 9)), y + 1),
+           "EVERY PICTURE DATED, EVERY STORY SOURCED",
+           font=font(F_SANS_B, 9), fill=GRAY)
+    y += 14
+    ccol_w, cgap = 192, 8
+    card_h = 70
+    cols = 5
+    for i, s in enumerate(medium):
+        col_i, row_i = i % cols, i // cols
+        x = MX + col_i * (ccol_w + cgap)
+        ry = y + row_i * (card_h + 4)
+        col = REGION_COLORS[s["region"]]
+        d.line([(x, ry), (x + ccol_w, ry)], fill=col, width=2)
+        mini_scene(d, x, ry + 2, ccol_w, 18, scene_for(s), 200 + s["n"])
+        d.rectangle([x, ry + 2, x + ccol_w, ry + 20], outline=INK, width=1)
+        # number chip on the strip
+        d.ellipse([x + 3, ry + 4, x + 16, ry + 17], fill=INK)
+        num = str(s["n"])
+        nw = d.textlength(num, font=font(F_SANS_B, 9))
+        d.text((x + 10 - nw / 2, ry + 5), num, font=font(F_SANS_B, 9),
+               fill=WHITE)
+        yy = ry + 23
+        f_ch = font(F_SANS_B, 11)
+        hl = wrap(d, s["headline"], f_ch, ccol_w)
+        if len(hl) > 2:
+            f_ch = font(F_SANS_B, 10)
+            hl = wrap(d, s["headline"], f_ch, ccol_w)
+        assert len(hl) <= 2, f"card headline {len(hl)} lines: {s['n']}"
+        yy = draw_lines(d, hl[:2], x, yy, f_ch, INK, 12)
+        f_cb = font(F_SANS, 10)
+        bl = wrap(d, s.get("body", ""), f_cb, ccol_w)
+        bl = trunc_lines(bl, 1, ccol_w, d, f_cb)
+        if bl:
+            yy = draw_lines(d, bl, x, yy + 1, f_cb, (40, 40, 40), 11)
+        d.text((x, ry + 60), s["source"], font=font(F_SANS_B, 8),
+               fill=GRAY)
+    rows = (len(medium) + cols - 1) // cols
+    y += rows * (card_h + 4) - 4 + 6
+
+    # ---- THE DAY IN EIGHT: 4 cols x 2 rows of small scenes ----
+    d.text((MX, y), "THE DAY IN EIGHT", font=font(F_SANS_B, 12), fill=INK)
+    y += 13
+    ecol_w, egap = 241, 10
+    esc_h = 38
+    row_h = esc_h + 15
+    for i, s in enumerate(eight[:8]):
+        col_i, row_i = i % 4, i // 4
+        x = MX + col_i * (ecol_w + egap)
+        ry = y + row_i * row_h
+        mini_scene(d, x, ry, ecol_w, esc_h, scene_for(s), 300 + s["n"])
+        d.rectangle([x, ry, x + ecol_w, ry + esc_h], outline=INK, width=1)
+        cap = f"{s['n']} · {s['place']} — " + (s.get("headline") or
+                                               s.get("text") or "")
+        f_cap = font(F_SANS_B, 10)
+        cl = wrap(d, cap, f_cap, ecol_w)
+        cl = trunc_lines(cl, 1, ecol_w, d, f_cap)
+        draw_lines(d, cl, x, ry + esc_h + 3, f_cap, INK, 11)
+    y += 2 * row_h + 6
+
+    # ---- ALSO list: 2 cols x N rows, one line per story ----
+    d.text((MX, y), f"ALSO ON {date_str.upper()}",
+           font=font(F_SANS_B, 12), fill=INK)
+    y += 13
+    acol_w = 490
+    f_an = font(F_SANS_B, 9)
+    f_at = font(F_SANS, 9)
     for i, s in enumerate(also):
-        col_i, row_i = i % 3, i // 3
+        col_i, row_i = i % 2, i // 2
         x = MX + col_i * (acol_w + 16)
-        ry = y + row_i * 14
-        # one visual line per story (winners' ALSO rows are single lines):
-        # bold "n · PLACE — " + regular text, truncated with ellipsis
+        ry = y + row_i * 11
         head = f"{s['n']} · {s['place']} — "
         hw = d.textlength(head, font=f_an)
         d.text((x, ry), head, font=f_an, fill=(31, 58, 95))
@@ -700,47 +916,51 @@ def main():
                     else first[:-1]
             first = (first + " …").strip()
         d.text((x + hw, ry), first, font=f_at, fill=INK)
-    y += 8 * 14 + 4
+    y += ((len(also) + 1) // 2) * 11 + 4
 
     # ---- footer: DATE CHECK ----
     d.line([(MX, y), (W - MX, y)], fill=INK, width=2)
-    y += 6
+    y += 5
     f_dc = font(F_SANS_B, 11)
     d.text((MX, y), "DATE CHECK  ", font=f_dc, fill=RED)
     dw = d.textlength("DATE CHECK  ", font=f_dc)
     f_dct = font(F_SERIF, 10)
-    decl = wrap(d, DATECHECK, f_dct, CW - dw)
+    decl = wrap(d, data.get("datecheck", ""), f_dct, CW - dw)
     yy = y
     for ln in decl:
         d.text((MX + dw, yy), ln, font=f_dct, fill=INK)
-        yy += 12
-    y = yy + 2
-    left = "LEFT OUT:  " + "  •  ".join(data["excluded"])
-    f_lo = font(F_SANS, 10)
+        yy += 11
+    y = yy + 1
+    left = "LEFT OUT:  " + "  •  ".join(data.get("excluded", []))
+    f_lo = font(F_SANS, 9)
     ll = wrap(d, left, f_lo, CW)
     for ln in ll:
         d.text((MX, y), ln, font=f_lo, fill=GRAY)
-        y += 12
-    y += 2
+        y += 10
+    y += 1
+    seen, srcs = [], []
+    for s in all_stories:
+        for p in s["source"].split("·"):
+            p = p.strip()
+            if p and p not in seen:
+                seen.append(p)
+                srcs.append(p)
     f_src2 = font(F_SANS, 9)
-    srcs = ("Sources: SCMP · Gulf News · AFP · FMT · Japan Times · "
-            "Al Jazeera · Korea Times · SBS · NYT · EU Insider · "
-            "BD Global Times")
-    sl = wrap(d, srcs, f_src2, CW)
+    sl = wrap(d, "Sources: " + " · ".join(srcs), f_src2, CW)
     for ln in sl:
         d.text((MX, y), ln, font=f_src2, fill=GRAY)
-        y += 11
-    foot = ("DRAWN BY AN AI AGENT FOR MAKE.FUN  ·  WEDNESDAY 25 NOVEMBER "
-            "2026  ·  ONE PAGE, ONE DAY")
+        y += 10
+    foot = (f"DRAWN BY AN AI AGENT FOR MAKE.FUN  ·  {date_str.upper()}  ·  "
+            "ONE PAGE, ONE DAY")
     fw = d.textlength(foot, font=font(F_SANS, 8))
-    d.text(((W - fw) / 2, y + 2), foot, font=font(F_SANS, 8), fill=GRAY)
-    y += 12
-    print(f"final y={y} (canvas {H})")
+    d.text(((W - fw) / 2, y + 1), foot, font=font(F_SANS, 8), fill=GRAY)
+    y += 10
+    print(f"final y={y} (canvas {H})  stories={n_total} "
+          f"medium={len(medium)} also={len(also)} timeline={len(timeline)}")
     assert y <= H, f"overflow: {y} > {H}"
 
-    out = os.path.join(HERE, "entry.png")
-    img.save(out, format="PNG")
-    print(f"wrote {out} {os.path.getsize(out)} bytes")
+    img.save(out_path, format="PNG")
+    print(f"wrote {out_path} {os.path.getsize(out_path)} bytes")
 
 
 if __name__ == "__main__":

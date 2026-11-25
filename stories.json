@@ -1,1 +1,341 @@
-{"also": [{"n": 12, "place": "BAGHDAD", "region": "MIDDLE EAST", "source": "JAPAN TIMES", "text": "Iraqi PM moves to seize Kurdish oilfields"}, {"n": 13, "place": "TEHRAN", "region": "MIDDLE EAST", "source": "GULF NEWS", "text": "Iran rules out US talks until 7 conditions met"}, {"n": 14, "place": "GAZA", "region": "MIDDLE EAST", "source": "BD GLOBAL TIMES", "text": "Death toll reaches 74,746, WAFA says"}, {"n": 15, "place": "SANDRINGHAM", "region": "EUROPE", "source": "SCMP", "text": "2 arrested after break-in at William's home"}, {"n": 16, "place": "PARIS", "region": "EUROPE", "source": "SCMP", "text": "Pelicot slams publisher over nude images in promo"}, {"n": 17, "place": "LONDON", "region": "EUROPE", "source": "JAPAN TIMES", "text": "UK warns firms of Russian sabotage threat"}, {"n": 18, "place": "COPENHAGEN", "region": "EUROPE", "source": "DAILY TELEGRAPH NZ", "text": "Denmark top court upholds 'ghetto' evictions"}, {"n": 19, "place": "BELGRADE", "region": "EUROPE", "source": "DAILY TELEGRAPH NZ", "text": "Serbia's Vucic reports death threats"}, {"n": 20, "place": "OSLO", "region": "EUROPE", "source": "DAILY TELEGRAPH NZ", "text": "Norway shuts out Russian speed skaters"}, {"n": 21, "place": "BRUSSELS", "region": "EUROPE", "source": "POLLAR", "text": "EU car sales +3.4% in Oct; EVs jump 56.1%"}, {"n": 22, "place": "NOUAKCHOTT", "region": "AFRICA", "source": "POLLAR", "text": "EU, Mauritania renew 4-year fishing deal"}, {"n": 23, "place": "DUSHANBE", "region": "ASIA", "source": "POLLAR", "text": "Tajikistan tells UN it will leave the ICC"}, {"n": 24, "place": "PYONGYANG", "region": "ASIA", "source": "POLLAR", "text": "N Korea threatens to shut Swiss office"}, {"n": 25, "place": "TAIPEI", "region": "ASIA", "source": "JAPAN TIMES", "text": "Taiwan local vote tests Lai ahead of 2028 race"}, {"n": 26, "place": "CANBERRA", "region": "OCEANIA", "source": "JAPAN TIMES", "text": "US criticises Australia social media law"}, {"n": 27, "place": "CANBERRA", "region": "OCEANIA", "source": "GUARDIAN", "text": "Australia apologises to LGBTQ veterans"}, {"n": 28, "place": "SEOUL", "region": "ASIA", "source": "PIQ", "text": "KOSPI falls 5.54% as chip stocks drop"}, {"n": 29, "place": "TOKYO", "region": "ASIA", "source": "JAPAN TIMES", "text": "Rakuten breach leaks clients' asset data"}, {"n": 30, "place": "NEW DELHI", "region": "ASIA", "source": "SAACHI BAAT", "text": "Modi, Merz mark 75 years of India-Germany ties"}, {"n": 31, "place": "NEW DELHI", "region": "ASIA", "source": "SAACHI BAAT", "text": "India, Canada 'very close' to trade deal"}, {"n": 32, "place": "JAKARTA", "region": "ASIA", "source": "BERNAMA", "text": "72 orangutans rescued from Kalimantan fires"}, {"n": 33, "place": "NAIROBI", "region": "AFRICA", "source": "NATION", "text": "Mount Kenya wildfire reignites"}, {"n": 34, "place": "NAIROBI", "region": "AFRICA", "source": "NATION", "text": "Cult leader Mackenzie jailed for 200 years"}, {"n": 35, "place": "BOGOTA", "region": "AMERICAS", "source": "SCMP", "text": "Gunmen hold hostages in Colombia supermarket"}], "date": "Wednesday 25 November 2026", "datecheck": "Every story here happened or was first reported on Wed 25 Nov 2026, as the named outlets reported it. Other-day stories were checked and left out — see below.", "excluded": ["Tue 24 Nov: Huawei guilty on 10 of 12 counts", "Tue 24 Nov: Giuliani gets Medal of Freedom", "Tue 24 Nov: 13 killed in RAK bus crash", "Tue 24 Nov: Landmine Monitor: 6,929 casualties in 2025", "Sun 22 Nov: COP31 ends with no deal", "Thu 19 Nov: ICJ: Myanmar committed genocide"], "main": [{"art": "tower", "body": "A Houthi drone struck a tower in Riyadh's King Abdullah Financial District, Saudi civil defence said, injuring 11 people, two of them Indian nationals. It is the second hit on the district's landmark tower in less than a week. The UAE condemned the attack.", "headline": "HOUTHIS HIT RIYADH'S TALLEST TOWER — 11 HURT", "lat": 24.71, "lon": 46.68, "n": 1, "place": "RIYADH", "region": "MIDDLE EAST", "source": "SCMP · GULF NEWS"}, {"art": "treaty", "body": "Australia and Solomon Islands signed a sweeping treaty in Canberra: no foreign military base will be built in the Pacific nation, and Australia becomes its main security partner. PM Matthew Wale flew in with 15 ministers; the deal is read as a setback for China.", "headline": "SOLOMONS SIGN PACT: NO FOREIGN BASES", "lat": -35.28, "lon": 149.13, "n": 2, "place": "CANBERRA", "region": "OCEANIA", "source": "AFP · FMT"}, {"art": "rocket", "body": "China's Shenzhou-24 spacecraft launched from Jiuquan carrying the first Pakistani national to fly to space. The crewed mission heads for the Tiangong station as Beijing widens its space programme to partner nations.", "headline": "SHENZHOU-24 LIFTS OFF WITH FIRST PAKISTANI", "lat": 40.96, "lon": 100.3, "n": 3, "place": "JIUQUAN", "region": "ASIA", "source": "JAPAN TIMES"}], "masthead": "THE WORLD IN ONE PAGE", "medium": [{"body": "The Saudi-led coalition struck Yemen's Red Sea port of Hodeidah after ordering civilians out. The Houthis threatened every Saudi Red Sea port, including Jeddah.", "headline": "Coalition hits Hodeidah; Houthis threaten Jeddah", "lat": 14.8, "lon": 42.95, "n": 4, "place": "HODEIDAH", "region": "MIDDLE EAST", "source": "AL JAZEERA"}, {"body": "Labour and management at Seoul Metro reached a wage deal on Wednesday, averting a planned general strike that would have halted the capital's subway.", "headline": "Seoul Metro wage deal; strike called off", "lat": 37.57, "lon": 126.98, "n": 5, "place": "SEOUL", "region": "ASIA", "source": "KOREA TIMES · SBS"}, {"body": "Washington paused joint ops while it probes a 23 Sept raid that killed gang leader Carlos German Munoz Jara. US strikes have sunk 70+ boats, killing 240+.", "headline": "US pauses Ecuador military ops over rights concerns", "lat": -0.18, "lon": -78.47, "n": 6, "place": "QUITO", "region": "AMERICAS", "source": "NEW YORK TIMES"}, {"body": "Army Sergeant Jian Zhao pleaded guilty to taking photos of restricted documents and offering to sell computers and hard drives to buyers in China.", "headline": "Soldier admits selling secrets to Chinese buyers", "lat": 38.9, "lon": -77.04, "n": 7, "place": "WASHINGTON", "region": "AMERICAS", "source": "SCMP"}, {"body": "Nvidia fell a day after its comeback rally, as CEO Jensen Huang told staff he made 'some terrible mistakes' and is in therapy. AI stocks dragged the market lower.", "headline": "Nvidia slides 5.86%; Huang says he is in therapy", "lat": 40.71, "lon": -74.01, "n": 8, "place": "NEW YORK", "region": "AMERICAS", "source": "SCMP · KOREA TIMES"}, {"body": "Costa and von der Leyen host six Balkan leaders. A special summit Thu-Fri must agree the 2028-34 budget and a 45bn euro Ukraine loan.", "headline": "EU hosts Balkan leaders as budget fight looms", "lat": 50.85, "lon": 4.35, "n": 9, "place": "BRUSSELS", "region": "EUROPE", "source": "EU INSIDER"}, {"body": "Moscow accused Kyiv of 'terrorist acts' after drone strikes on a Russian cargo ship in the Gulf of Finland and a warship off Benghazi. Kyiv called it self-defence.", "headline": "Russia calls Ukraine ship strikes 'terrorism'", "lat": 32.12, "lon": 20.07, "n": 10, "place": "BENGHAZI", "region": "EUROPE", "source": "BD GLOBAL TIMES"}, {"body": "Four people were killed and others wounded in an Israeli attack on a flat in western Gaza City, al-Shifa Hospital told Al Jazeera, despite the ceasefire.", "headline": "Israeli strike on Gaza City flat kills four", "lat": 31.5, "lon": 34.47, "n": 11, "place": "GAZA CITY", "region": "MIDDLE EAST", "source": "AL JAZEERA"}], "ticker": ["11 INJURED AS HOUTHIS HIT RIYADH TOWER", "NO FOREIGN BASES: SOLOMONS PACT SIGNED", "SHENZHOU-24 LAUNCHES WITH 1ST PAKISTANI", "KOSPI -5.54%  ·  NVIDIA -5.86%", "US PAUSES ECUADOR MILITARY OPS"]}
+{
+ "also": [
+  {
+   "n": 12,
+   "place": "BAGHDAD",
+   "region": "MIDDLE EAST",
+   "source": "JAPAN TIMES",
+   "text": "Iraqi PM moves to seize Kurdish oilfields"
+  },
+  {
+   "n": 13,
+   "place": "TEHRAN",
+   "region": "MIDDLE EAST",
+   "source": "GULF NEWS",
+   "text": "Iran rules out US talks until 7 conditions met"
+  },
+  {
+   "n": 14,
+   "place": "GAZA",
+   "region": "MIDDLE EAST",
+   "source": "BD GLOBAL TIMES",
+   "text": "Death toll reaches 74,746, WAFA says"
+  },
+  {
+   "n": 15,
+   "place": "SANDRINGHAM",
+   "region": "EUROPE",
+   "source": "SCMP",
+   "text": "2 arrested after break-in at William's home"
+  },
+  {
+   "n": 16,
+   "place": "PARIS",
+   "region": "EUROPE",
+   "source": "SCMP",
+   "text": "Pelicot slams publisher over nude images in promo"
+  },
+  {
+   "n": 17,
+   "place": "LONDON",
+   "region": "EUROPE",
+   "source": "JAPAN TIMES",
+   "text": "UK warns firms of Russian sabotage threat"
+  },
+  {
+   "n": 18,
+   "place": "COPENHAGEN",
+   "region": "EUROPE",
+   "source": "DAILY TELEGRAPH NZ",
+   "text": "Denmark top court upholds 'ghetto' evictions"
+  },
+  {
+   "n": 19,
+   "place": "BELGRADE",
+   "region": "EUROPE",
+   "source": "DAILY TELEGRAPH NZ",
+   "text": "Serbia's Vucic reports death threats"
+  },
+  {
+   "n": 20,
+   "place": "OSLO",
+   "region": "EUROPE",
+   "source": "DAILY TELEGRAPH NZ",
+   "text": "Norway shuts out Russian speed skaters"
+  },
+  {
+   "n": 21,
+   "region": "EUROPE",
+   "place": "BRUSSELS",
+   "text": "EU warns 11 states on spending rules; deficit cases eyed",
+   "source": "YENI SAFAK"
+  },
+  {
+   "n": 22,
+   "place": "NOUAKCHOTT",
+   "region": "AFRICA",
+   "source": "POLLAR",
+   "text": "EU, Mauritania renew 4-year fishing deal"
+  },
+  {
+   "n": 23,
+   "place": "DUSHANBE",
+   "region": "ASIA",
+   "source": "POLLAR",
+   "text": "Tajikistan tells UN it will leave the ICC"
+  },
+  {
+   "n": 24,
+   "place": "PYONGYANG",
+   "region": "ASIA",
+   "source": "POLLAR",
+   "text": "N Korea threatens to shut Swiss office"
+  },
+  {
+   "n": 25,
+   "place": "TAIPEI",
+   "region": "ASIA",
+   "source": "JAPAN TIMES",
+   "text": "Taiwan local vote tests Lai ahead of 2028 race"
+  },
+  {
+   "n": 26,
+   "place": "CANBERRA",
+   "region": "OCEANIA",
+   "source": "JAPAN TIMES",
+   "text": "US criticises Australia social media law"
+  },
+  {
+   "n": 27,
+   "place": "CANBERRA",
+   "region": "OCEANIA",
+   "source": "GUARDIAN",
+   "text": "Australia apologises to LGBTQ veterans"
+  },
+  {
+   "n": 28,
+   "place": "SEOUL",
+   "region": "ASIA",
+   "source": "PIQ",
+   "text": "KOSPI falls 5.54% as chip stocks drop",
+   "time_utc": "02:20"
+  },
+  {
+   "n": 29,
+   "place": "TOKYO",
+   "region": "ASIA",
+   "source": "JAPAN TIMES",
+   "text": "Rakuten breach leaks clients' asset data"
+  },
+  {
+   "n": 30,
+   "place": "NEW DELHI",
+   "region": "ASIA",
+   "source": "SAACHI BAAT",
+   "text": "Modi, Merz mark 75 years of India-Germany ties"
+  },
+  {
+   "n": 31,
+   "place": "NEW DELHI",
+   "region": "ASIA",
+   "source": "SAACHI BAAT",
+   "text": "India, Canada 'very close' to trade deal"
+  },
+  {
+   "n": 32,
+   "place": "JAKARTA",
+   "region": "ASIA",
+   "source": "BERNAMA",
+   "text": "72 orangutans rescued from Kalimantan fires"
+  },
+  {
+   "n": 33,
+   "place": "NAIROBI",
+   "region": "AFRICA",
+   "source": "NATION",
+   "text": "Mount Kenya wildfire reignites"
+  },
+  {
+   "n": 34,
+   "region": "AFRICA",
+   "place": "ABUJA",
+   "text": "Nigeria Senate approves loan requests Tinubu withdrew",
+   "source": "PREMIUM TIMES",
+   "time_utc": "05:56"
+  },
+  {
+   "n": 35,
+   "place": "BOGOTA",
+   "region": "AMERICAS",
+   "source": "SCMP",
+   "text": "Gunmen hold hostages in Colombia supermarket"
+  }
+ ],
+ "date": "Wednesday 25 November 2026",
+ "datecheck": "Every story here happened or was first reported on Wed 25 Nov 2026, as the named outlets reported it. Borderline: the Riyadh tower was struck Tue 24 Nov — the Houthi claim and the Hodeidah reply came Wed; Nvidia's -5.86% was Tuesday's US session.",
+ "excluded": [
+  "Tue 24 Nov: Huawei guilty on 10 of 12 counts",
+  "Tue 24 Nov: Giuliani gets Medal of Freedom",
+  "Tue 24 Nov: 13 killed in RAK bus crash",
+  "Tue 24 Nov: Landmine Monitor: 6,929 casualties in 2025",
+  "Sun 22 Nov: COP31 ends with no deal",
+  "Thu 19 Nov: ICJ: Myanmar committed genocide",
+  "Tue 24 Nov: NYT: US paused Ecuador ops",
+  "Tue 24 Nov: ACEA: EU car sales +3.4%",
+  "Fri 6 Nov: Mackenzie jailed for 200 years"
+ ],
+ "main": [
+  {
+   "art": "tower",
+   "body": "A Houthi drone struck a tower in Riyadh's King Abdullah Financial District, Saudi civil defence said, injuring 11 people, two of them Indian nationals. It is the second hit on the district's landmark tower in less than a week. The UAE condemned the attack.",
+   "headline": "HOUTHIS HIT RIYADH'S TALLEST TOWER — 11 HURT",
+   "lat": 24.71,
+   "lon": 46.68,
+   "n": 1,
+   "place": "RIYADH",
+   "region": "MIDDLE EAST",
+   "source": "SCMP · GULF NEWS"
+  },
+  {
+   "art": "treaty",
+   "body": "Australia and Solomon Islands signed a sweeping treaty in Canberra: no foreign military base will be built in the Pacific nation, and Australia becomes its main security partner. PM Matthew Wale flew in with 15 ministers; the deal is read as a setback for China.",
+   "headline": "SOLOMONS SIGN PACT: NO FOREIGN BASES",
+   "lat": -35.28,
+   "lon": 149.13,
+   "n": 2,
+   "place": "CANBERRA",
+   "region": "OCEANIA",
+   "source": "AFP · FMT"
+  },
+  {
+   "art": "rocket",
+   "body": "China's Shenzhou-24 spacecraft launched from Jiuquan carrying the first Pakistani national to fly to space. The crewed mission heads for the Tiangong station as Beijing widens its space programme to partner nations.",
+   "headline": "SHENZHOU-24 LIFTS OFF WITH FIRST PAKISTANI",
+   "lat": 40.96,
+   "lon": 100.3,
+   "n": 3,
+   "place": "JIUQUAN",
+   "region": "ASIA",
+   "source": "JAPAN TIMES",
+   "time_utc": "00:18"
+  }
+ ],
+ "masthead": "THE WORLD IN ONE PAGE",
+ "medium": [
+  {
+   "body": "The Saudi-led coalition struck Yemen's Red Sea port of Hodeidah after ordering civilians out. The Houthis threatened every Saudi Red Sea port, including Jeddah.",
+   "headline": "Coalition hits Hodeidah; Houthis threaten Jeddah",
+   "lat": 14.8,
+   "lon": 42.95,
+   "n": 4,
+   "place": "HODEIDAH",
+   "region": "MIDDLE EAST",
+   "source": "AL JAZEERA",
+   "time_utc": "02:22"
+  },
+  {
+   "body": "Labour and management at Seoul Metro reached a wage deal on Wednesday, averting a planned general strike that would have halted the capital's subway.",
+   "headline": "Seoul Metro wage deal; strike called off",
+   "lat": 37.57,
+   "lon": 126.98,
+   "n": 5,
+   "place": "SEOUL",
+   "region": "ASIA",
+   "source": "KOREA TIMES · SBS"
+  },
+  {
+   "n": 6,
+   "region": "AMERICAS",
+   "place": "WASHINGTON",
+   "headline": "Trump: Iran war 'funded' through January",
+   "body": "President Trump told US media his war on Iran is 'funded' through January, warning Democrats against halting it, Al Jazeera reported.",
+   "source": "DAWN",
+   "lon": -77.04,
+   "lat": 38.9,
+   "time_utc": "03:00",
+   "art": "flag"
+  },
+  {
+   "body": "Army Sergeant Jian Zhao pleaded guilty to taking photos of restricted documents and offering to sell computers and hard drives to buyers in China.",
+   "headline": "Soldier admits selling secrets to Chinese buyers",
+   "lat": 38.9,
+   "lon": -77.04,
+   "n": 7,
+   "place": "WASHINGTON",
+   "region": "AMERICAS",
+   "source": "SCMP"
+  },
+  {
+   "body": "Nvidia fell a day after its comeback rally, as CEO Jensen Huang told staff he made 'some terrible mistakes' and is in therapy. AI stocks dragged the market lower.",
+   "headline": "Nvidia slides 5.86%; Huang says he is in therapy",
+   "lat": 40.71,
+   "lon": -74.01,
+   "n": 8,
+   "place": "NEW YORK",
+   "region": "AMERICAS",
+   "source": "SCMP · KOREA TIMES"
+  },
+  {
+   "body": "Costa and von der Leyen host six Balkan leaders. A special summit Thu-Fri must agree the 2028-34 budget and a 45bn euro Ukraine loan.",
+   "headline": "EU hosts Balkan leaders as budget fight looms",
+   "lat": 50.85,
+   "lon": 4.35,
+   "n": 9,
+   "place": "BRUSSELS",
+   "region": "EUROPE",
+   "source": "EU INSIDER"
+  },
+  {
+   "body": "Moscow accused Kyiv of 'terrorist acts' after drone strikes on a Russian cargo ship in the Gulf of Finland and a warship off Benghazi. Kyiv called it self-defence.",
+   "headline": "Russia calls Ukraine ship strikes 'terrorism'",
+   "lat": 32.12,
+   "lon": 20.07,
+   "n": 10,
+   "place": "BENGHAZI",
+   "region": "EUROPE",
+   "source": "BD GLOBAL TIMES"
+  },
+  {
+   "body": "Four people were killed and others wounded in an Israeli attack on a flat in western Gaza City, al-Shifa Hospital told Al Jazeera, despite the ceasefire.",
+   "headline": "Israeli strike on Gaza City flat kills four",
+   "lat": 31.5,
+   "lon": 34.47,
+   "n": 11,
+   "place": "GAZA CITY",
+   "region": "MIDDLE EAST",
+   "source": "AL JAZEERA"
+  }
+ ],
+ "ticker": [
+  "Houthis hit Riyadh tower — 11 hurt",
+  "Solomons sign pact: no foreign bases",
+  "Shenzhou-24 lifts off with first Pakistani"
+ ],
+ "numbers": [
+  [
+   "11",
+   "hurt in Riyadh tower strike"
+  ],
+  [
+   "45bn",
+   "Ukraine loan on the table"
+  ],
+  [
+   "74,746",
+   "Gaza death toll, WAFA says"
+  ],
+  [
+   "500",
+   "new hires in Seoul Metro deal"
+  ],
+  [
+   "72",
+   "orangutans rescued"
+  ],
+  [
+   "-5.54%",
+   "KOSPI's Wednesday fall"
+  ]
+ ],
+ "wires_read": "WIRES READ UP TO 08:30 UTC"
+}

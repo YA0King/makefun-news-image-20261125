@@ -1,4 +1,4 @@
-// news-image-20261125 entry, second version (Node 22, standard library only).
+// news-image-20261125 entry, third version (Node 22, standard library only).
 //
 // The entry is a program that writes one image summing up the world
 // news of Wednesday 25 November 2026 to /output/entry.png.
@@ -8,16 +8,18 @@
 // randomness) from stories.json — 35 news stories, every one verified
 // as having happened or first been reported on 25 November 2026, each
 // with its source — plus a Natural Earth world outline
-// (land-110m.geojson, public domain). This is the v2 rendering:
-// a cream-paper broadsheet rebuilt by studying the previous day's
-// winning entries — Didone serif masthead, italic ticker, 6-number
-// strip, UTC timeline, 3 illustrated hero stories, 8 medium stories
-// in a grid, a world map with numbered pins, a 24-story list, and a
-// DATE CHECK footer that adjudicates borderline cases (the Riyadh
-// tower strike and the Nvidia sell-off were Tuesday events with
-// Wednesday developments). Re-running render.py writes byte-identical
-// output, and this program copies those same bytes to the output
-// directory, so the run is deterministic.
+// (land-110m.geojson, public domain). This is the v3 rendering: the
+// v2 broadsheet pushed further — a full UTC timeline built from five
+// verified event times (Shenzhou-24 00:18, KOSPI 02:20, Hodeidah
+// 02:22, Trump on Iran 03:00, Nigeria Senate 05:56), 8 medium
+// stories each with a drawn mini scene plus a "THE DAY IN EIGHT"
+// strip of 8 small scenes, taller hero scenes (92px) and a taller
+// map (96px), and a DATE CHECK footer that now lists 9 excluded
+// other-day stories (three date errors in v2 were fixed: the
+// Ecuador pause, the EU car-sales release and the Mackenzie
+// 200-year term were not 25 November news). Re-running render.py
+// writes byte-identical output, and this program copies those same
+// bytes to the output directory, so the run is deterministic.
 //
 // Run it the way the grader does:
 //   mkdir -p out && MAKEFUN_BOT_DIR=. MAKEFUN_OUTPUT_DIR=out node main.ts
@@ -30,8 +32,14 @@ const outDir = process.env.MAKEFUN_OUTPUT_DIR ?? "/output";
 mkdirSync(outDir, { recursive: true });
 
 const here = dirname(fileURLToPath(import.meta.url));
+const source = join(here, "entry.png");
+// Fail fast with a clear message if the entry image is missing from
+// the repository, instead of a bare ENOENT from the copy below.
+if (!existsSync(source)) {
+  throw new Error(`entry image missing from repository: ${source}`);
+}
 const dest = join(outDir, "entry.png");
-copyFileSync(join(here, "entry.png"), dest);
+copyFileSync(source, dest);
 
 // Verify the written entry: it must exist, be non-empty, and start
 // with a PNG or JPEG magic header (the competition judges the file
@@ -77,6 +85,12 @@ if (size > MAX_BYTES) {
 }
 if (isPng) {
   const buf = readFileSync(dest);
+  // The first chunk of a PNG must be IHDR (bytes 12-15); a file with
+  // a valid magic but a corrupt or truncated header would otherwise
+  // hand us garbage dimensions.
+  if (buf.length < 24 || buf.subarray(12, 16).toString("ascii") !== "IHDR") {
+    throw new Error(`entry image is not a well-formed PNG (first chunk is not IHDR): ${dest}`);
+  }
   const width = buf.readUInt32BE(16);
   const height = buf.readUInt32BE(20);
   if (width > 1024 || height > 1024) {
