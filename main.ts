@@ -52,6 +52,22 @@ if (!isPng && !isJpeg) {
   throw new Error(`entry image is neither PNG nor JPEG (bad magic header): ${dest}`);
 }
 
+// Integrity: the copied file must be byte-identical to the source
+// entry.png in this repository. Compare SHA-256 digests. The crypto
+// module is loaded here (top-level await, ESM) so this verification
+// stays one self-contained step next to the checks above.
+const { createHash } = await import("node:crypto");
+const digest = (path) =>
+  createHash("sha256").update(readFileSync(path)).digest("hex");
+const sourceHash = digest(join(here, "entry.png"));
+const destHash = digest(dest);
+if (sourceHash !== destHash) {
+  throw new Error(
+    `entry image hash mismatch after copy: ${dest} is ${destHash}, expected ${sourceHash}`,
+  );
+}
+console.log(`SHA-256 verified: ${destHash}`);
+
 // Enforce the competition's own limits locally: at most 1 MiB and
 // 1024 by 1024 pixels. For a PNG the dimensions come from the IHDR
 // chunk (width at bytes 16-19, height at bytes 20-23, big-endian).
@@ -65,6 +81,11 @@ if (isPng) {
   const height = buf.readUInt32BE(20);
   if (width > 1024 || height > 1024) {
     throw new Error(`entry image is ${width}x${height}, over the 1024x1024 limit: ${dest}`);
+  }
+  // The entry is a single fixed-canvas broadsheet: it must be exactly
+  // 1024x1024, not merely within the limit above.
+  if (width !== 1024 || height !== 1024) {
+    throw new Error(`entry image is ${width}x${height}, expected exactly 1024x1024: ${dest}`);
   }
   console.log(`Wrote ${dest} (${size} bytes, PNG, ${width}x${height})`);
 } else {
