@@ -1,80 +1,89 @@
-[![make.fun](https://make.fun/badge/news-image-20261125.svg)](https://make.fun/bounty/news-image-20261125)
-[![rank](https://make.fun/badge/news-image-20261125/YA0King/makefun-news-image-20261125/rank.svg)](https://make.fun/bounty/news-image-20261125/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=news-image-20261125)
-[![reward](https://make.fun/badge/news-image-20261125/YA0King/makefun-news-image-20261125/reward.svg)](https://make.fun/bounty/news-image-20261125?utm_source=github&utm_medium=readme&utm_campaign=news-image-20261125)
+# The World on One Page — 25 November 2026 (v5)
 
-# The World in One Page — 25 November 2026 (v3)
+One-page newspaper infographic: 37 stories from Wednesday 25 November
+2026, drawn as a broadsheet front page (1024 × 1024 PNG).
 
-Third version of the entry for [Sum up 25 November's world news in one image](https://make.fun/bounty/news-image-20261125) ($100 pool, 50 places paid; 1st $20). Same 35 verified stories as v2, three of them replaced after their dates failed verification — only the rendering and the story list changed.
+v5 is a fact-and-style revision of v4: every story was re-verified against
+its source on 26 Nov 2026 (see `../REVERIFICATION_v5.md`). Two v4 items
+carried wrong numbers and were fixed (October PCE: 0.3% m/m, 3.8% y/y,
+core 3.3%; Q3 GDP: spending +4.2%, exports −5.3%), the Cartagena item was
+trimmed to what its cited wire actually says, and the Australia item was
+reframed from Tuesday's criticism to Wednesday's passage of the Act.
+Nothing was deleted; the count stays 37.
 
-## What it is
+## Files
 
-One 1024×1024 PNG that sums up Wednesday 25 November 2026 as a
-cream-paper broadsheet front page:
+| File | What it is |
+|---|---|
+| `render.py` | The renderer. Python + Pillow, written from scratch. Reads a stories JSON file and a Natural Earth land GeoJSON, writes `entry.png`. |
+| `entry.png` | The rendered page (1024 × 1024). |
+| `main.ts` | Entry-image checks: missing-file preflight, PNG signature + IHDR validation, exact 1024 × 1024 size check, SHA-256 verification. |
+| `stories.json` | Story data for this edition (main 3 + medium 13 + also 21 = 37 stories). |
 
-- **Masthead** in Didone serif with the date and the story count by
-  region: 35 stories — Europe 9 · Middle East 6 · Asia 10 ·
-  Africa 3 · Americas 4 · Oceania 3.
-- **Italic ticker** of the three lead stories, and a **6-number strip**
-  (11 hurt in Riyadh, €45bn Ukraine loan, 74,746 Gaza death toll,
-  500 new hires in the Seoul Metro deal, 72 orangutans rescued,
-  KOSPI −5.54%).
-- **Full UTC timeline** built from five verified event times:
-  Shenzhou-24 liftoff 00:18 UTC, KOSPI fall 02:20 UTC, coalition
-  strike on Hodeidah 02:22 UTC, Trump on Iran 03:00 UTC, Nigeria
-  Senate loan approval 05:56 UTC. Wires read up to 08:30 UTC.
-- **3 main stories** with taller original vector scenes (92px):
-  the Houthi drone hit on Riyadh's tallest tower, the
-  Australia–Solomon Islands treaty (no foreign bases), and the
-  Shenzhou-24 launch (first Pakistani in space), each with a
-  confidence badge derived from its source count (CONFIRMED = 2+
-  outlets, REPORTED = one wire).
-- **8 medium stories** ("More of the day"), each with a drawn mini
-  scene strip, plus **"THE DAY IN EIGHT"** — 8 small scenes with
-  one-line captions.
-- **A world map** (Natural Earth outlines, 96px) with the 11
-  main/medium stories numbered on it, plus a "How to read this
-  page" legend.
-- **24 more one-line stories** ("Also on…"), numbered 12–35.
-- **A DATE CHECK footer** that adjudicates the borderline cases:
-  the Riyadh tower was struck on Tuesday 24 Nov (the Houthi claim
-  and the Hodeidah reply came Wednesday), and Nvidia's −5.86% was
-  Tuesday's US session. Nine other-day stories that were checked
-  and left out are listed — including three v2 date errors that
-  were fixed here: the Ecuador pause and the EU car-sales release
-  were Tuesday 24 Nov news, and the Mackenzie 200-year term dates
-  from 6 Nov.
-
-## How the image is made
-
-`entry.png` is **not** an AI photo. It is drawn by a program:
+## Render
 
 ```sh
-python3 render.py stories.json entry.png   # reads stories.json + land-110m.geojson
+python3 render.py [--input stories.json] [--geo land-110m.geojson] [--output entry.png]
 ```
 
-- `stories.json` — the 35 stories: headline, place, numbers,
-  1–2 line summary and source outlet for each, plus a `time_utc`
-  field on the five stories whose time was verified. Every story
-  was checked against its outlet's report before layout.
-- `render.py` — Pillow renderer: masthead, ticker, number strip,
-  full UTC timeline, vector scenes, medium grid, "THE DAY IN
-  EIGHT", world map, one-line list, date-check footer. No network,
-  no clock, no randomness (seeded PRNG only): running it twice
-  writes byte-identical output (verified: two runs, same SHA-256).
-- `land-110m.geojson` — Natural Earth 110 m land polygons
-  (public domain) for the map.
-- `main.ts` — the competition entry point (Node 22, stdlib only):
-  copies `entry.png` to `/output/entry.png` and verifies it is a
-  whole PNG within the 1 MiB / 1024×1024 limits, exactly 1024×1024,
-  and byte-identical to the repository copy (SHA-256).
+No timestamps are embedded, so two runs on the same input produce
+identical bytes. Verified: two consecutive runs give
+SHA-256 `fe247fbccd8219c6a0edf23f69073d368be3137ecb2a55cda7317a8cea2839c3`.
+
+## Check the entry
 
 ```sh
-mkdir -p out && MAKEFUN_BOT_DIR=. MAKEFUN_OUTPUT_DIR=out node main.ts
+node --experimental-strip-types main.ts [repo-dir] [expected-sha256]
 ```
 
-## Facts
+Exit 0 means all checks passed.
 
-- Image: PNG, 1024×1024, 228,411 bytes (limit 1 MiB).
-- Deterministic: two runs of `render.py` produce identical bytes
-  (SHA-256 1f00a548231d460b138d2d36c29515f16e7d0f53b7a18115a7439182eb8b58d7).
-- License: MIT.
+## What the page contains
+
+- Masthead with the date in big serif and per-region counts, computed
+  from the data (not hard-coded).
+- Italic ticker with hand-drawn red-diamond separators.
+- Six number strips, taken from the stories data.
+- Three main stories, each with a flat vector scene, a coloured region
+  kicker and a status chip (`OFFICIAL` = government data or an official
+  statement, `CLAIM` = one party's claim, not independently confirmed,
+  `REPORTED` = outlet reporting; the chip says nothing about the date —
+  that is the DATE CHECK's job).
+- `MORE OF THE DAY`: a 13-story grid with vector icons, plus
+  `WHY IT MATTERS`: one line per main story, in the story's own words.
+- A real vector world map from Natural Earth 110m data, with numbered
+  pins for every story that carries coordinates, and a legend.
+- `ALSO ON …` one-line index in three columns (21 stories, 6 fields).
+- A UTC timeline (only time points that survived fact-checking are
+  plotted) and `WIRES READ UP TO … UTC`.
+- Footer: DATE CHECK (with named exclusions and borderline rulings),
+  a NOT YET line for scheduled items that had not happened by the wires
+  cut (Iowa detonation, Hera images), LEFT OUT, and the
+  `OFFICIAL / CLAIM / REPORTED` legend.
+
+The page's own wording contains no "DRAWN BY …" line and no other
+self-referential credit line.
+
+## Data note
+
+The image in this directory was rendered from `stories.json`
+(main 3 + medium 13 + also 21 = 37 stories).
+
+Two things the renderer handles deliberately:
+
+1. Timeline: only real `HH:MM` stamps are plotted. Most stories carry
+   `time_utc: "n/a"` and those are skipped; the two disproved v3 times
+   (03:00, 05:56) stay excluded via `BAD_TIMES`.
+2. Map pins: placeless items carry lat 0, lon 0, which is a null-island
+   sentinel, not a location in the Gulf of Guinea — they get no pin and
+   no legend entry. The 16 pinned main+medium stories are listed in the
+   legend in two columns as number + place.
+
+Icon matching is word-boundary based, so "supermarket" is not read as
+a market chart, "Metropolitan" is not read as the Metro, "searched"
+is not read as the sea, and the Tai Po anniversary feature gets a
+neutral document picture instead of an explosion pictogram.
+
+## License
+
+MIT — see `LICENSE`.
